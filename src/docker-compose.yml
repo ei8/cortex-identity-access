@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+#  identityaccess.in.api:
+#    image: ei8works/identityaccess.in.api:0.1.0
+#    build:
+#      context: .
+#      dockerfile: ./main/Port.Adapter/In/Api/Dockerfile
+  identityaccess.out.api:
+    image: ei8works/identityaccess.out.api:0.1.1
+    build:
+      context: .
+      dockerfile: ./main/Port.Adapter/Out/Api/Dockerfile

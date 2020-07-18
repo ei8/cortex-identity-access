@@ -1,0 +1,150 @@
+﻿using ei8.Cortex.IdentityAccess.Application;
+using ei8.Cortex.IdentityAccess.Common;
+using Nancy;
+using Nancy.Extensions;
+using Nancy.IO;
+using Nancy.Responses;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
+{
+    public class ValidationModule : NancyModule
+    {
+        public ValidationModule(IValidationApplicationService validationApplicationService) : base("/identityaccess/validations")
+        {
+            // based on ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api.Helper
+            // TODO: centralize with ei8.Cortex.Diary.Nucleus.Port.Adapter.In.Api.Helper
+            this.Post("/createneuron", async (parameters) =>
+            {
+                var result = new Response { StatusCode = HttpStatusCode.OK };
+                string[] requiredFields = new string[] { "NeuronId", "RegionId", "SubjectId" };
+
+                dynamic bodyAsObject = null;
+                Dictionary<string, object> bodyAsDictionary = null;
+                var jsonString = RequestStream.FromStream(this.Request.Body).AsString();
+                string[] missingFields = null;
+
+                if (!string.IsNullOrEmpty(jsonString))
+                {
+                    bodyAsDictionary = JObject.Parse(jsonString).ToObject<Dictionary<string, object>>();
+                    missingFields = requiredFields.Where(s => !bodyAsDictionary.ContainsKey(s)).ToArray();
+                }
+                else
+                    missingFields = requiredFields;
+
+                if (missingFields.Length == 0)
+                {
+                    bodyAsObject = JsonConvert.DeserializeObject(jsonString);
+                    ActionValidationResult validationResult = await validationApplicationService.CreateNeuron(
+                        System.Guid.Parse(bodyAsObject.NeuronId.ToString()),
+                        System.Guid.Parse(bodyAsObject.RegionId.ToString()),
+                        System.Guid.Parse(bodyAsObject.SubjectId.ToString())
+                        );
+
+                    result = ValidationModule.CreateResponse(validationResult);
+                }
+                else
+                {
+                    result = new TextResponse(
+                        HttpStatusCode.BadRequest, 
+                        $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
+                    );
+                }
+                return result;
+            }
+            );
+
+            this.Post("/updateneuron", async (parameters) =>
+            {
+                var result = new Response { StatusCode = HttpStatusCode.OK };
+                string[] requiredFields = new string[] { "NeuronId", "SubjectId" };
+
+                dynamic bodyAsObject = null;
+                Dictionary<string, object> bodyAsDictionary = null;
+                var jsonString = RequestStream.FromStream(this.Request.Body).AsString();
+                string[] missingFields = null;
+
+                if (!string.IsNullOrEmpty(jsonString))
+                {
+                    bodyAsDictionary = JObject.Parse(jsonString).ToObject<Dictionary<string, object>>();
+                    missingFields = requiredFields.Where(s => !bodyAsDictionary.ContainsKey(s)).ToArray();
+                }
+                else
+                    missingFields = requiredFields;
+
+                if (missingFields.Length == 0)
+                {
+                    bodyAsObject = JsonConvert.DeserializeObject(jsonString);
+                    ActionValidationResult validationResult = await validationApplicationService.UpdateNeuron(
+                        Guid.Parse(bodyAsObject.NeuronId.ToString()),
+                        Guid.Parse(bodyAsObject.SubjectId.ToString())
+                        );
+
+                    result = ValidationModule.CreateResponse(validationResult);
+                }
+                else
+                {
+                    result = new TextResponse(
+                        HttpStatusCode.BadRequest,
+                        $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
+                    );
+                }
+                return result;
+            }
+            );
+
+            this.Post("/readneurons", async (parameters) =>
+            {
+                var result = new Response { StatusCode = HttpStatusCode.OK };
+                string[] requiredFields = new string[] { "NeuronIds", "SubjectId" };
+
+                Dictionary<string, object> bodyAsDictionary = null;
+                var jsonString = RequestStream.FromStream(this.Request.Body).AsString();
+                string[] missingFields = null;
+
+                var definition = new { NeuronIds = new string[] { }, SubjectId = string.Empty };
+                if (!string.IsNullOrEmpty(jsonString))
+                {
+                    bodyAsDictionary = JObject.Parse(jsonString).ToObject<Dictionary<string, object>>();
+                    missingFields = requiredFields.Where(s => !bodyAsDictionary.ContainsKey(s)).ToArray();
+                }
+                else
+                    missingFields = requiredFields;
+
+                if (missingFields.Length == 0)
+                {
+                    var bodyAsObject = JsonConvert.DeserializeAnonymousType(jsonString, definition);
+                    ActionValidationResult validationResult = await validationApplicationService.ReadNeurons(
+                        bodyAsObject.NeuronIds.Select(ni => Guid.Parse(ni)),
+                        Guid.Parse(bodyAsObject.SubjectId)
+                        );
+
+                    result = ValidationModule.CreateResponse(validationResult);
+                }
+                else
+                {
+                    result = new TextResponse(
+                        HttpStatusCode.BadRequest,
+                        $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
+                    );
+                }
+                return result;
+            }
+            );
+        }
+
+        private static TextResponse CreateResponse(ActionValidationResult validationResult)
+        {
+            return new TextResponse(
+                validationResult.HasErrors ?
+                    HttpStatusCode.BadRequest :
+                    HttpStatusCode.OK,
+                JsonConvert.SerializeObject(validationResult)
+                );
+        }
+    }
+}
