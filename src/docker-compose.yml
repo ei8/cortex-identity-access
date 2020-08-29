@@ -7,7 +7,7 @@ services:
 #      context: .
 #      dockerfile: ./main/Port.Adapter/In/Api/Dockerfile
   identityaccess.out.api:
-    image: ei8works/identityaccess.out.api:0.1.1
+    image: ei8works/identityaccess.out.api:0.1.2
     build:
       context: .
       dockerfile: ./main/Port.Adapter/Out/Api/Dockerfile

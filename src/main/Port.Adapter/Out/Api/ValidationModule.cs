@@ -36,23 +36,30 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
                 else
                     missingFields = requiredFields;
 
-                if (missingFields.Length == 0)
+                try
                 {
-                    bodyAsObject = JsonConvert.DeserializeObject(jsonString);
-                    ActionValidationResult validationResult = await validationApplicationService.CreateNeuron(
-                        System.Guid.Parse(bodyAsObject.NeuronId.ToString()),
-                        System.Guid.Parse(bodyAsObject.RegionId.ToString()),
-                        System.Guid.Parse(bodyAsObject.SubjectId.ToString())
-                        );
+                    if (missingFields.Length == 0)
+                    {
+                        bodyAsObject = JsonConvert.DeserializeObject(jsonString);
+                        ActionValidationResult validationResult = await validationApplicationService.CreateNeuron(
+                            System.Guid.Parse(bodyAsObject.NeuronId.ToString()),
+                            System.Guid.Parse(bodyAsObject.RegionId.ToString()),
+                            System.Guid.Parse(bodyAsObject.SubjectId.ToString())
+                            );
 
-                    result = ValidationModule.CreateResponse(validationResult);
+                        result = ValidationModule.CreateResponse(validationResult);
+                    }
+                    else
+                    {
+                        result = new TextResponse(
+                            HttpStatusCode.BadRequest,
+                            $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
+                        );
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    result = new TextResponse(
-                        HttpStatusCode.BadRequest, 
-                        $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
-                    );
+                    result = new TextResponse(HttpStatusCode.InternalServerError, ex.ToString());
                 }
                 return result;
             }
@@ -76,22 +83,29 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
                 else
                     missingFields = requiredFields;
 
-                if (missingFields.Length == 0)
+                try
                 {
-                    bodyAsObject = JsonConvert.DeserializeObject(jsonString);
-                    ActionValidationResult validationResult = await validationApplicationService.UpdateNeuron(
-                        Guid.Parse(bodyAsObject.NeuronId.ToString()),
-                        Guid.Parse(bodyAsObject.SubjectId.ToString())
-                        );
+                    if (missingFields.Length == 0)
+                    {
+                        bodyAsObject = JsonConvert.DeserializeObject(jsonString);
+                        ActionValidationResult validationResult = await validationApplicationService.UpdateNeuron(
+                            Guid.Parse(bodyAsObject.NeuronId.ToString()),
+                            Guid.Parse(bodyAsObject.SubjectId.ToString())
+                            );
 
-                    result = ValidationModule.CreateResponse(validationResult);
+                        result = ValidationModule.CreateResponse(validationResult);
+                    }
+                    else
+                    {
+                        result = new TextResponse(
+                            HttpStatusCode.BadRequest,
+                            $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
+                        );
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    result = new TextResponse(
-                        HttpStatusCode.BadRequest,
-                        $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
-                    );
+                    result = new TextResponse(HttpStatusCode.InternalServerError, ex.ToString());
                 }
                 return result;
             }
@@ -115,22 +129,29 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
                 else
                     missingFields = requiredFields;
 
-                if (missingFields.Length == 0)
+                try
                 {
-                    var bodyAsObject = JsonConvert.DeserializeAnonymousType(jsonString, definition);
-                    ActionValidationResult validationResult = await validationApplicationService.ReadNeurons(
-                        bodyAsObject.NeuronIds.Select(ni => Guid.Parse(ni)),
-                        Guid.Parse(bodyAsObject.SubjectId)
-                        );
+                    if (missingFields.Length == 0)
+                    {
+                        var bodyAsObject = JsonConvert.DeserializeAnonymousType(jsonString, definition);
+                        ActionValidationResult validationResult = await validationApplicationService.ReadNeurons(
+                            bodyAsObject.NeuronIds.Select(ni => Guid.Parse(ni)),
+                            Guid.Parse(bodyAsObject.SubjectId)
+                            );
 
-                    result = ValidationModule.CreateResponse(validationResult);
+                        result = ValidationModule.CreateResponse(validationResult);
+                    }
+                    else
+                    {
+                        result = new TextResponse(
+                            HttpStatusCode.BadRequest,
+                            $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
+                        );
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    result = new TextResponse(
-                        HttpStatusCode.BadRequest,
-                        $"Required field(s) '{ string.Join("', '", missingFields) }' not found."
-                    );
+                    result = new TextResponse(HttpStatusCode.InternalServerError, ex.ToString());
                 }
                 return result;
             }

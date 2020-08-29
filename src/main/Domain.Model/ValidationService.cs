@@ -43,8 +43,9 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 var region = (await this.neuronGraphQueryClient.GetNeuronById(
                     this.settingsService.CortexGraphOutBaseUrl + "/",
                     neuronRegionId.ToString(),
+                    new NeuronQuery() { NeuronActiveValues = ActiveValues.All },
                     token: token
-                    )).FirstOrDefault();
+                    ));
                 if (region == null)
                     neuronErrors.Add(new ErrorInfo("Invalid region specified.", ErrorType.Error));
                 else
@@ -108,8 +109,9 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             var neuron = (await this.neuronGraphQueryClient.GetNeuronById(
                 this.settingsService.CortexGraphOutBaseUrl + "/",
                 neuronId.ToString(),
-                token: token
-                )).First();
+                new NeuronQuery() { NeuronActiveValues = ActiveValues.All },
+                token
+                ));
 
             await this.authorRepository.Initialize();
             author = await this.authorRepository.GetBySubjectId(subjectId);
@@ -156,11 +158,16 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 ));
             AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, subjectId, Constants.Messages.Exception.InvalidId, nameof(subjectId));
 
-            var query = new NeuronQuery() { Id = neuronIds.Select(g => g.ToString()) };
+            var query = new NeuronQuery() {
+                Id = neuronIds.Select(g => g.ToString()), 
+                NeuronActiveValues = ActiveValues.All
+            };
+
+            // get neurons which are also inactive
             var neurons = await this.neuronGraphQueryClient.GetNeurons(
                 this.settingsService.CortexGraphOutBaseUrl + "/",
-                neuronQuery: query,
-                token: token
+                query,
+                token
                 );
             var actionErrors = new List<ErrorInfo>();
             var neuronResults = new List<NeuronValidationResult>();
