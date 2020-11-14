@@ -16,7 +16,7 @@ namespace ei8.Cortex.IdentityAccess.Application
             this.validationService = validationService;
         }
 
-        public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid regionId, Guid subjectId, CancellationToken token = default)
+        public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid? regionId, Guid subjectId, CancellationToken token = default)
         {
             return await this.validationService.CreateNeuron(neuronId, regionId, subjectId, token);
         }

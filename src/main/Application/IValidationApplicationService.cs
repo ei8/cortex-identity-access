@@ -9,7 +9,7 @@ namespace ei8.Cortex.IdentityAccess.Application
 {
     public interface IValidationApplicationService
     {
-        Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid regionId, Guid subjectId, CancellationToken token = default);
+        Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid? regionId, Guid subjectId, CancellationToken token = default);
 
         Task<ActionValidationResult> UpdateNeuron(Guid neuronId, Guid subjectId, CancellationToken token = default);
 

@@ -35,11 +35,12 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.IdentityAccess
             if (user != null)
             {
                 // check if null if neuron is inactive or deactivated, if so, should throw exception
-                var userNeuron = await this.neuronGraphQueryClient.GetNeuronById(
+                var userNeuron = (await this.neuronGraphQueryClient.GetNeuronById(
                     this.settingsService.CortexGraphOutBaseUrl + "/",
                     user.NeuronId.ToString(),
                     new NeuronQuery() { NeuronActiveValues = ActiveValues.All }
-                    );
+                    )
+                    ).Neurons.FirstOrDefault();
 
                 AssertionConcern.AssertStateTrue(userNeuron != null, Constants.Messages.Exception.NeuronNotFound);
                 AssertionConcern.AssertStateTrue(userNeuron.Active, Constants.Messages.Exception.NeuronInactive);

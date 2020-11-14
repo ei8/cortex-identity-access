@@ -21,7 +21,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
             this.Post("/createneuron", async (parameters) =>
             {
                 var result = new Response { StatusCode = HttpStatusCode.OK };
-                string[] requiredFields = new string[] { "NeuronId", "RegionId", "SubjectId" };
+                string[] requiredFields = new string[] { "NeuronId", "SubjectId" };
 
                 dynamic bodyAsObject = null;
                 Dictionary<string, object> bodyAsDictionary = null;
@@ -41,9 +41,15 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
                     if (missingFields.Length == 0)
                     {
                         bodyAsObject = JsonConvert.DeserializeObject(jsonString);
+                        Guid? regionId = null;
+                        
+                        if (bodyAsDictionary.ContainsKey("RegionId"))
+                            if (Guid.TryParse(bodyAsObject.RegionId.ToString(), out Guid tempRegionId))
+                                regionId = tempRegionId;
+
                         ActionValidationResult validationResult = await validationApplicationService.CreateNeuron(
                             System.Guid.Parse(bodyAsObject.NeuronId.ToString()),
-                            System.Guid.Parse(bodyAsObject.RegionId.ToString()),
+                            regionId,
                             System.Guid.Parse(bodyAsObject.SubjectId.ToString())
                             );
 

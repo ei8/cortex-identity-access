@@ -10,7 +10,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
 
         public Guid UserNeuronId { get; set; }
 
-        public Guid RegionNeuronId { get; set; }
+        public Guid? RegionNeuronId { get; set; }
 
         public int WriteLevel { get; set; }
 
