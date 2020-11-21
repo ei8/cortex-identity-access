@@ -1,14 +1,14 @@
 version: '3.4'
 
 services:
-#  identityaccess.in.api:
+#  cortex.identityaccess.in.api:
 #    env_file:
 #      - ./var1.env
 #    environment:
 #      - ASPNETCORE_ENVIRONMENT=Development
 #    volumes:
 #      - /C/ei8/avatars/prod/sample:/C/db
-  identityaccess.out.api:
+  cortex.identityaccess.out.api:
     env_file: 
       - ./var1.env
     environment:

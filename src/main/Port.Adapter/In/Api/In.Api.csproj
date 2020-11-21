@@ -12,7 +12,7 @@
 
   <ItemGroup>
     <PackageReference Include="CqrsLite" Version="0.18.1" />
-    <PackageReference Include="ei8.Cortex.Graph.Client" Version="0.1.17" />
+    <PackageReference Include="ei8.Cortex.Graph.Client" Version="0.1.19" />
     <PackageReference Include="ei8.Cortex.Graph.Common" Version="0.1.19" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="2.6.0" />
     <PackageReference Include="Nancy" Version="2.0.0-clinteastwood" />
