@@ -7,6 +7,7 @@ using ei8.Cortex.IdentityAccess.Domain.Model;
 using ei8.Cortex.IdentityAccess.Port.Adapter.Common;
 using ei8.Cortex.IdentityAccess.Application;
 using ei8.Cortex.Graph.Client;
+using ei8.Cortex.Graph.Common;
 
 namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.IdentityAccess
 {
@@ -33,12 +34,16 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.IdentityAccess
 
             if (user != null)
             {
-                // TODO: check if null if neuron is inactive or deactivated, if so, should throw exception
+                // check if null if neuron is inactive or deactivated, if so, should throw exception
                 var userNeuron = (await this.neuronGraphQueryClient.GetNeuronById(
                     this.settingsService.CortexGraphOutBaseUrl + "/",
-                    user.NeuronId.ToString()     
-                    )).First();
+                    user.NeuronId.ToString(),
+                    new NeuronQuery() { NeuronActiveValues = ActiveValues.All }
+                    )
+                    ).Neurons.FirstOrDefault();
+
                 AssertionConcern.AssertStateTrue(userNeuron != null, Constants.Messages.Exception.NeuronNotFound);
+                AssertionConcern.AssertStateTrue(userNeuron.Active, Constants.Messages.Exception.NeuronInactive);
 
                 var permits = await (this.connection.Table<RegionPermit>().Where(e => e.UserNeuronId == user.NeuronId)).ToArrayAsync();
                 result = new Author(user, permits);

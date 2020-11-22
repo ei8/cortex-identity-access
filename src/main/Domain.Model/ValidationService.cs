@@ -26,7 +26,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             this.authorRepository = authorRepository;
         }
 
-        public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid neuronRegionId, Guid subjectId, CancellationToken token = default)
+        public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid? neuronRegionId, Guid subjectId, CancellationToken token = default)
         {
             AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, neuronId, Constants.Messages.Exception.InvalidId, nameof(neuronId));
 
@@ -37,18 +37,19 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             Guid userNeuronId = Guid.Empty;
 
             // if non-root region was specified, check if it exists
-            if (neuronRegionId != Guid.Empty)
+            if (neuronRegionId.HasValue)
             {
                 // ensure that layer is a valid neuron
-                var region = (await this.neuronGraphQueryClient.GetNeuronById(
+                var qs = (await this.neuronGraphQueryClient.GetNeuronById(
                     this.settingsService.CortexGraphOutBaseUrl + "/",
-                    neuronRegionId.ToString(),
+                    neuronRegionId.Value.ToString(),
+                    new NeuronQuery() { NeuronActiveValues = ActiveValues.All },
                     token: token
-                    )).FirstOrDefault();
-                if (region == null)
+                    ));
+                if (qs == null || qs.Neurons == null || qs.Neurons.Count() == 0)
                     neuronErrors.Add(new ErrorInfo("Invalid region specified.", ErrorType.Error));
                 else
-                    regionTag = region.Tag;
+                    regionTag = qs.Neurons.First().Tag;
             }
             else
                 regionTag = "Base";
@@ -108,8 +109,9 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             var neuron = (await this.neuronGraphQueryClient.GetNeuronById(
                 this.settingsService.CortexGraphOutBaseUrl + "/",
                 neuronId.ToString(),
-                token: token
-                )).First();
+                new NeuronQuery() { NeuronActiveValues = ActiveValues.All },
+                token
+                )).Neurons.First();
 
             await this.authorRepository.Initialize();
             author = await this.authorRepository.GetBySubjectId(subjectId);
@@ -118,16 +120,10 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 actionErrors.Add(new ErrorInfo(Constants.Messages.Exception.UnauthorizedUserAccess, ErrorType.Error));
             else
             {
-                var regionTag = neuron.RegionId != null ? neuron.RegionTag : "Base";
+                var regionTag = neuron.Region.Id != null ? neuron.Region.Tag : "Base";
                 // get write permit of author user for region
-                var permit = author.Permits.SingleOrDefault(p => 
-                    (
-                        p.RegionNeuronId.ToString() == neuron.RegionId ||
-                        (
-                            neuron.RegionId == null &&
-                            p.RegionNeuronId == Guid.Empty
-                        )
-                    )
+                var permit = author.Permits.SingleOrDefault(p =>
+                    p.RegionNeuronId.EqualsString(neuron.Region.Id)
                     && p.WriteLevel > 0
                 );
 
@@ -135,7 +131,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 if (permit == null)
                     neuronErrors.Add(new ErrorInfo(string.Format(Constants.Messages.Exception.UnauthorizedRegionWriteTemplate, regionTag), ErrorType.Error));
                 // does author user have an admin write access, or author user is the author of this neuron
-                else if (!(permit.WriteLevel == 2 || neuron.AuthorId == author.User.NeuronId.ToString()))
+                else if (!(permit.WriteLevel == 2 || neuron.Creation.Author.Id == author.User.NeuronId.ToString()))
                     neuronErrors.Add(new ErrorInfo(string.Format(Constants.Messages.Exception.UnauthorizedNeuronWriteTemplate, neuron.Tag), ErrorType.Error));
             }
 
@@ -156,11 +152,16 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 ));
             AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, subjectId, Constants.Messages.Exception.InvalidId, nameof(subjectId));
 
-            var query = new NeuronQuery() { Id = neuronIds.Select(g => g.ToString()) };
-            var neurons = await this.neuronGraphQueryClient.GetNeurons(
+            var query = new NeuronQuery() {
+                Id = neuronIds.Select(g => g.ToString()), 
+                NeuronActiveValues = ActiveValues.All
+            };
+
+            // get neurons which are also inactive
+            var queryResult = await this.neuronGraphQueryClient.GetNeurons(
                 this.settingsService.CortexGraphOutBaseUrl + "/",
-                neuronQuery: query,
-                token: token
+                query,
+                token
                 );
             var actionErrors = new List<ErrorInfo>();
             var neuronResults = new List<NeuronValidationResult>();
@@ -172,21 +173,15 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             {
                 actionErrors.Add(new ErrorInfo(Constants.Messages.Exception.UnauthorizedUserAccess, ErrorType.Error));
             }
-            else if (neurons.Count() > 0)
+            else if (queryResult.Neurons.Count() > 0)
             {
                 // loop through each neuron
-                foreach (var neuron in neurons)
+                foreach (var neuron in queryResult.Neurons)
                 {
-                    var regionTag = neuron.RegionId != null ? neuron.RegionTag : "Base";
+                    var regionTag = neuron.Region.Id != null ? neuron.Region.Tag : "Base";
                     // get region permit of author user for region
                     var permit = author.Permits.SingleOrDefault(p =>
-                        (
-                            p.RegionNeuronId.ToString() == neuron.RegionId ||
-                            (
-                                neuron.RegionId == null &&
-                                p.RegionNeuronId == Guid.Empty
-                            )
-                        )
+                        p.RegionNeuronId.EqualsString(neuron.Region.Id)
                         && p.ReadLevel > 0
                     );
 
