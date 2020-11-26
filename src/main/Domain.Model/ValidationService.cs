@@ -153,8 +153,9 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, subjectId, Constants.Messages.Exception.InvalidId, nameof(subjectId));
 
             var query = new NeuronQuery() {
-                Id = neuronIds.Select(g => g.ToString()), 
-                NeuronActiveValues = ActiveValues.All
+                Id = neuronIds.Select(g => g.ToString()),
+                NeuronActiveValues = ActiveValues.All,
+                PageSize = neuronIds.Count()
             };
 
             // get neurons which are also inactive
