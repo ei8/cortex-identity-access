@@ -16,12 +16,12 @@ namespace ei8.Cortex.IdentityAccess.Application
             this.authorRepository = authorRepository;
         }
 
-        public async Task<AuthorInfo> GetAuthorBySubjectId(Guid subjectId, CancellationToken token = default)
+        public async Task<AuthorInfo> GetAuthorByUserId(string userId, CancellationToken token = default)
         {
-            AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, subjectId, Constants.Messages.Exception.InvalidId, nameof(subjectId));
+            AssertionConcern.AssertArgumentNotEmpty(userId, Constants.Messages.Exception.InvalidUserId, nameof(userId));
 
             await this.authorRepository.Initialize();
-            var author = await this.authorRepository.GetBySubjectId(subjectId);
+            var author = await this.authorRepository.GetByUserId(userId);
             return author != null ? new AuthorInfo(author.User.NeuronId, author.User.Active) : null;
         }
     }

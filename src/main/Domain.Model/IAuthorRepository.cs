@@ -5,7 +5,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
 {
     public interface IAuthorRepository
     {
-        Task<Author> GetBySubjectId(Guid subjectId);
+        Task<Author> GetByUserId(string userId);
 
         Task Initialize();
     }

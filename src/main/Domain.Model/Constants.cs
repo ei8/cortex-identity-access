@@ -11,6 +11,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             public struct Exception
             {
                 public const string InvalidId = "Id must not be equal to '00000000-0000-0000-0000-000000000000'.";
+                public const string InvalidUserId = "User Id must not be null or empty.";
                 public const string AnonymousUserExpected = "Anonymous User expected.";
                 public const string UnauthorizedUserAccess = "User access not authorized.";
                 public const string NeuronNotFound = "User Neuron not found.";

@@ -26,7 +26,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             this.authorRepository = authorRepository;
         }
 
-        public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid? neuronRegionId, Guid subjectId, CancellationToken token = default)
+        public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid? neuronRegionId, string userId, CancellationToken token = default)
         {
             AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, neuronId, Constants.Messages.Exception.InvalidId, nameof(neuronId));
 
@@ -60,17 +60,17 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 string.Empty
                 )).NotificationList.Count == 0)
             {
-                AssertionConcern.AssertArgumentValid(g => g == Guid.Empty, subjectId, Constants.Messages.Exception.AnonymousUserExpected, nameof(subjectId));
+                AssertionConcern.AssertArgumentValid(g => g == string.Empty, userId, Constants.Messages.Exception.AnonymousUserExpected, nameof(userId));
 
                 userNeuronId = neuronId;
             }
             // Ensure that Neuron Id is not equal to AuthorId if non-first Neuron is being created
             else
             {
-                AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, subjectId, Constants.Messages.Exception.InvalidId, nameof(subjectId));
+                AssertionConcern.AssertArgumentNotEmpty(userId, Constants.Messages.Exception.InvalidUserId, nameof(userId));
 
                 await this.authorRepository.Initialize();
-                author = await this.authorRepository.GetBySubjectId(subjectId);
+                author = await this.authorRepository.GetByUserId(userId);
 
                 if (author == null)
                     actionErrors.Add(new ErrorInfo(Constants.Messages.Exception.UnauthorizedUserAccess, ErrorType.Error));
@@ -96,10 +96,10 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                     );
         }
 
-        public async Task<ActionValidationResult> UpdateNeuron(Guid neuronId, Guid subjectId, CancellationToken token = default)  
+        public async Task<ActionValidationResult> UpdateNeuron(Guid neuronId, string userId, CancellationToken token = default)  
         {
             AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, neuronId, Constants.Messages.Exception.InvalidId, nameof(neuronId));
-            AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, subjectId, Constants.Messages.Exception.InvalidId, nameof(subjectId));
+            AssertionConcern.AssertArgumentNotEmpty(userId, Constants.Messages.Exception.InvalidUserId, nameof(userId));
 
             var actionErrors = new List<ErrorInfo>();
             var neuronErrors = new List<ErrorInfo>();
@@ -114,7 +114,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 )).Neurons.First();
 
             await this.authorRepository.Initialize();
-            author = await this.authorRepository.GetBySubjectId(subjectId);
+            author = await this.authorRepository.GetByUserId(userId);
 
             if (author == null)
                 actionErrors.Add(new ErrorInfo(Constants.Messages.Exception.UnauthorizedUserAccess, ErrorType.Error));
@@ -144,13 +144,13 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                     );
         }
 
-        public async Task<ActionValidationResult> ReadNeurons(IEnumerable<Guid> neuronIds, Guid subjectId, CancellationToken token = default)
+        public async Task<ActionValidationResult> ReadNeurons(IEnumerable<Guid> neuronIds, string userId, CancellationToken token = default)
         {
             AssertionConcern.AssertArgumentNotNull(neuronIds, nameof(neuronIds));
             neuronIds.ToList().ForEach(g => AssertionConcern.AssertArgumentValid(
                 guid => guid != Guid.Empty, g, Constants.Messages.Exception.InvalidId, nameof(neuronIds)
                 ));
-            AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, subjectId, Constants.Messages.Exception.InvalidId, nameof(subjectId));
+            AssertionConcern.AssertArgumentNotEmpty(userId, Constants.Messages.Exception.InvalidUserId, nameof(userId));
 
             var query = new NeuronQuery() {
                 Id = neuronIds.Select(g => g.ToString()),
@@ -168,7 +168,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
             var neuronResults = new List<NeuronValidationResult>();
 
             await this.authorRepository.Initialize();
-            Author author = await this.authorRepository.GetBySubjectId(subjectId);
+            Author author = await this.authorRepository.GetByUserId(userId);
 
             if (author == null)
             {

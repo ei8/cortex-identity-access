@@ -21,7 +21,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
             this.Post("/createneuron", async (parameters) =>
             {
                 var result = new Response { StatusCode = HttpStatusCode.OK };
-                string[] requiredFields = new string[] { "NeuronId", "SubjectId" };
+                string[] requiredFields = new string[] { "NeuronId", "UserId" };
 
                 dynamic bodyAsObject = null;
                 Dictionary<string, object> bodyAsDictionary = null;
@@ -50,7 +50,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
                         ActionValidationResult validationResult = await validationApplicationService.CreateNeuron(
                             System.Guid.Parse(bodyAsObject.NeuronId.ToString()),
                             regionId,
-                            System.Guid.Parse(bodyAsObject.SubjectId.ToString())
+                            bodyAsObject.UserId.ToString()
                             );
 
                         result = ValidationModule.CreateResponse(validationResult);
@@ -74,7 +74,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
             this.Post("/updateneuron", async (parameters) =>
             {
                 var result = new Response { StatusCode = HttpStatusCode.OK };
-                string[] requiredFields = new string[] { "NeuronId", "SubjectId" };
+                string[] requiredFields = new string[] { "NeuronId", "UserId" };
 
                 dynamic bodyAsObject = null;
                 Dictionary<string, object> bodyAsDictionary = null;
@@ -96,7 +96,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
                         bodyAsObject = JsonConvert.DeserializeObject(jsonString);
                         ActionValidationResult validationResult = await validationApplicationService.UpdateNeuron(
                             Guid.Parse(bodyAsObject.NeuronId.ToString()),
-                            Guid.Parse(bodyAsObject.SubjectId.ToString())
+                            bodyAsObject.UserId.ToString()
                             );
 
                         result = ValidationModule.CreateResponse(validationResult);
@@ -120,13 +120,13 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
             this.Post("/readneurons", async (parameters) =>
             {
                 var result = new Response { StatusCode = HttpStatusCode.OK };
-                string[] requiredFields = new string[] { "NeuronIds", "SubjectId" };
+                string[] requiredFields = new string[] { "NeuronIds", "UserId" };
 
                 Dictionary<string, object> bodyAsDictionary = null;
                 var jsonString = RequestStream.FromStream(this.Request.Body).AsString();
                 string[] missingFields = null;
 
-                var definition = new { NeuronIds = new string[] { }, SubjectId = string.Empty };
+                var definition = new { NeuronIds = new string[] { }, UserId = string.Empty };
                 if (!string.IsNullOrEmpty(jsonString))
                 {
                     bodyAsDictionary = JObject.Parse(jsonString).ToObject<Dictionary<string, object>>();
@@ -142,7 +142,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
                         var bodyAsObject = JsonConvert.DeserializeAnonymousType(jsonString, definition);
                         ActionValidationResult validationResult = await validationApplicationService.ReadNeurons(
                             bodyAsObject.NeuronIds.Select(ni => Guid.Parse(ni)),
-                            Guid.Parse(bodyAsObject.SubjectId)
+                            bodyAsObject.UserId.ToString()
                             );
 
                         result = ValidationModule.CreateResponse(validationResult);

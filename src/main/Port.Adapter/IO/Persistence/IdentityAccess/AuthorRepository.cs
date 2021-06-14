@@ -23,13 +23,13 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.IdentityAccess
             this.neuronGraphQueryClient = neuronGraphQueryClient;
         }
 
-        public async Task<Author> GetBySubjectId(Guid subjectId)
+        public async Task<Author> GetByUserId(string userId)
         {
-            AssertionConcern.AssertArgumentValid(g => g != Guid.Empty, subjectId, Constants.Messages.Exception.InvalidId, nameof(subjectId));
+            AssertionConcern.AssertArgumentNotEmpty(userId, Constants.Messages.Exception.InvalidUserId, nameof(userId));
 
             Author result = null;
 
-            var results = this.connection.Table<User>().Where(e => e.SubjectId == subjectId);
+            var results = this.connection.Table<User>().Where(e => e.UserId == userId);
             var user = (await results.ToListAsync()).SingleOrDefault();
 
             if (user != null)
@@ -60,7 +60,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.IdentityAccess
             //await this.connection.InsertAsync(new User()
             //{
             //    NeuronId = Guid.NewGuid(),
-            //    SubjectId = Guid.NewGuid()
+            //    UserId  = Guid.NewGuid()
             //});
 
             // sample data creator - call Initialize from CustomBootstrapper to invoke

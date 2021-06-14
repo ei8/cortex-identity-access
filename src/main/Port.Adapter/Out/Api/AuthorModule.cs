@@ -16,15 +16,14 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
             this.Get(string.Empty, async (parameters) =>
             {
                 var result = new Response { StatusCode = HttpStatusCode.OK };
-                var subjectId = Guid.Empty;
 
-                if (this.Request.Query["subjectid"].HasValue && Guid.TryParse(this.Request.Query["subjectid"].ToString(), out subjectId))
+                if (this.Request.Query["userid"].HasValue)
                 {
-                    var author = await authorApplicationService.GetAuthorBySubjectId(subjectId);
+                    var author = await authorApplicationService.GetAuthorByUserId(this.Request.Query["userid"].ToString());
                     result = new TextResponse(JsonConvert.SerializeObject(author));
                 }
                 else
-                    result = new TextResponse(HttpStatusCode.BadRequest, "SubjectId was invalid or not specified.");
+                    result = new TextResponse(HttpStatusCode.BadRequest, "UserId is invalid or missing.");
 
                 return result;
             }

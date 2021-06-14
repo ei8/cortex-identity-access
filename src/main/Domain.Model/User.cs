@@ -11,15 +11,15 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
     public class User
     {
         /// <summary>
-        /// NeuronId of User Neuron.
+        /// User Id of this User in Identity Access server. This property should be stored as a separate Neuron in a secure layer when it is converted.
         /// </summary>
         [PrimaryKey]
-        public Guid NeuronId { get; set; }
-        
+        public string UserId { get; set; }
+
         /// <summary>
-        /// Subject Id of this User in Identity Access server. This property should be stored as a separate Neuron in a secure layer when it is converted.
+        /// NeuronId of User Neuron.
         /// </summary>
-        public Guid SubjectId { get; set; }
+        public Guid NeuronId { get; set; }
 
         public bool Active { get; set; }
     }

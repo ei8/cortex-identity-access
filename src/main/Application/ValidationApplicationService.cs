@@ -16,19 +16,19 @@ namespace ei8.Cortex.IdentityAccess.Application
             this.validationService = validationService;
         }
 
-        public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid? regionId, Guid subjectId, CancellationToken token = default)
+        public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid? regionId, string userId, CancellationToken token = default)
         {
-            return await this.validationService.CreateNeuron(neuronId, regionId, subjectId, token);
+            return await this.validationService.CreateNeuron(neuronId, regionId, userId, token);
         }
 
-        public async Task<ActionValidationResult> UpdateNeuron(Guid neuronId, Guid subjectId, CancellationToken token = default)
+        public async Task<ActionValidationResult> UpdateNeuron(Guid neuronId, string userId, CancellationToken token = default)
         {
-            return await this.validationService.UpdateNeuron(neuronId, subjectId, token);
+            return await this.validationService.UpdateNeuron(neuronId, userId, token);
         }
 
-        public async Task<ActionValidationResult> ReadNeurons(IEnumerable<Guid> neuronIds, Guid subjectId, CancellationToken token = default)
+        public async Task<ActionValidationResult> ReadNeurons(IEnumerable<Guid> neuronIds, string userId, CancellationToken token = default)
         {
-            return await this.validationService.ReadNeurons(neuronIds, subjectId, token);
+            return await this.validationService.ReadNeurons(neuronIds, userId, token);
         }
 
     }

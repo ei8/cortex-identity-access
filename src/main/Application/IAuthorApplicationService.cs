@@ -7,6 +7,6 @@ namespace ei8.Cortex.IdentityAccess.Application
 {
     public interface IAuthorApplicationService
     {
-        Task<AuthorInfo> GetAuthorBySubjectId(Guid subjectId, CancellationToken token = default(CancellationToken));
+        Task<AuthorInfo> GetAuthorByUserId(string userId, CancellationToken token = default(CancellationToken));
     }
 }
