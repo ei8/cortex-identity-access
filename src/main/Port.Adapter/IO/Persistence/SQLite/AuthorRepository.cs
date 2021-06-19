@@ -9,7 +9,7 @@ using ei8.Cortex.IdentityAccess.Application;
 using ei8.Cortex.Graph.Client;
 using ei8.Cortex.Graph.Common;
 
-namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.IdentityAccess
+namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.SQLite
 {
     public class AuthorRepository : IAuthorRepository
     {
