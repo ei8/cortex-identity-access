@@ -186,7 +186,7 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                         && p.ReadLevel > 0
                     );
 
-                    // does author user have a write permit
+                    // does author user have a read permit
                     if (permit == null)
                     {
                         neuronResults.Add(new NeuronValidationResult(Guid.Parse(neuron.Id), new ErrorInfo[]
