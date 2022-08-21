@@ -42,8 +42,8 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.SQLite
                     )
                     ).Neurons.FirstOrDefault();
 
-                AssertionConcern.AssertStateTrue(userNeuron != null, Constants.Messages.Exception.NeuronNotFound);
-                AssertionConcern.AssertStateTrue(userNeuron.Active, Constants.Messages.Exception.NeuronInactive);
+                AssertionConcern.AssertStateTrue(userNeuron != null, Constants.Messages.Exception.UserNeuronNotFound);
+                AssertionConcern.AssertStateTrue(userNeuron.Active, Constants.Messages.Exception.UserNeuronInactive);
 
                 var permits = await (this.connection.Table<RegionPermit>().Where(e => e.UserNeuronId == user.NeuronId)).ToArrayAsync();
                 result = new Author(user, permits);

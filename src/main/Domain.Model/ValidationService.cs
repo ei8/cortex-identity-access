@@ -111,7 +111,9 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 neuronId.ToString(),
                 new NeuronQuery() { NeuronActiveValues = ActiveValues.All },
                 token
-                )).Neurons.First();
+                )).Neurons.FirstOrDefault();
+
+            AssertionConcern.AssertArgumentValid(n => n != null, neuron, Constants.Messages.Exception.NeuronNotFound, nameof(neuronId));
 
             await this.authorRepository.Initialize();
             author = await this.authorRepository.GetByUserId(userId);
