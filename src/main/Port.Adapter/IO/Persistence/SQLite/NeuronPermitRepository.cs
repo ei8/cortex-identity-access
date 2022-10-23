@@ -22,7 +22,12 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.SQLite
             AssertionConcern.AssertArgumentValid(g => g.IsNotEmpty(), permit.UserNeuronId, Constants.Messages.Exception.InvalidUserId, nameof(permit.UserNeuronId));
             AssertionConcern.AssertArgumentValid(g => g.IsNotEmpty(), permit.NeuronId, Constants.Messages.Exception.InvalidId, nameof(permit.NeuronId));
 
-            await this.connection.InsertAsync(permit);
+            if (await this.connection.Table<NeuronPermit>()
+                                     .FirstOrDefaultAsync(np => np.UserNeuronId == permit.UserNeuronId &&
+                                                                np.NeuronId == permit.NeuronId) == null)
+            {
+                await this.connection.InsertAsync(permit);
+            }
         }
 
         public async Task<NeuronPermit> GetAsync(Guid userNeuronId, Guid neuronId)
