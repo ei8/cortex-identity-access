@@ -3,9 +3,9 @@ using System;
 
 namespace ei8.Cortex.IdentityAccess.Application.AccessRequest.Commands
 {
-    public class CreateNeuronRequestAccess : ICommand
+    public class CreateNeuronAccessRequest : ICommand
     {
-        public CreateNeuronRequestAccess(Guid neuronId, Guid userNeuronId)
+        public CreateNeuronAccessRequest(Guid neuronId, Guid userNeuronId)
         {
             NeuronId = neuronId;
             UserNeuronId = userNeuronId;

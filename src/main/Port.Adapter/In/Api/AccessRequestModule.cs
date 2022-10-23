@@ -24,7 +24,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.In.Api
                            false,
                            async (bodyAsObject, bodyAsDictionary, expectedVersion) =>
                            {
-                               await commandSender.Send(new CreateNeuronRequestAccess(
+                               await commandSender.Send(new CreateNeuronAccessRequest(
                                    Guid.Parse(parameters.neuronId),
                                    Guid.Parse(bodyAsObject.UserId.ToString())
                                    )

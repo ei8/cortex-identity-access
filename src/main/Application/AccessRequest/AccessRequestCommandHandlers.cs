@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ei8.Cortex.IdentityAccess.Application.AccessRequest
 {
-    public class AccessRequestCommandHandlers : ICancellableCommandHandler<CreateNeuronRequestAccess>
+    public class AccessRequestCommandHandlers : ICancellableCommandHandler<CreateNeuronAccessRequest>
     {
         private readonly IPermitApplicationService permitApplicationService;
 
@@ -15,7 +15,7 @@ namespace ei8.Cortex.IdentityAccess.Application.AccessRequest
             this.permitApplicationService = permitApplicationService;
         }
 
-        public async Task Handle(CreateNeuronRequestAccess message, CancellationToken token = default)
+        public async Task Handle(CreateNeuronAccessRequest message, CancellationToken token = default)
         {
             AssertionConcern.AssertArgumentNotNull(message, nameof(message));
 
