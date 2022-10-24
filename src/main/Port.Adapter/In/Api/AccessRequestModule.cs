@@ -1,6 +1,4 @@
-﻿using CQRSlite.Commands;
-using CQRSlite.Domain.Exception;
-using ei8.Cortex.IdentityAccess.Application.AccessRequest.Commands;
+﻿using ei8.Cortex.IdentityAccess.Application;
 using Nancy;
 using neurUL.Common.Api;
 using System;
@@ -10,13 +8,10 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.In.Api
     public class AccessRequestModule : NancyModule
     {
         internal static readonly Func<Exception, HttpStatusCode> ConcurrencyExceptionSetter = new Func<Exception, HttpStatusCode>((ex) => {
-            if (ex is ConcurrencyException)
-                return HttpStatusCode.Conflict;
-
             return HttpStatusCode.InternalServerError;
         });
 
-        public AccessRequestModule(ICommandSender commandSender) : base("accessRequest")
+        public AccessRequestModule(IPermitApplicationService permitApplicationService) : base("accessRequest")
         {
             this.Post("/neuron/{neuronId}", async (parameters) =>
             {
@@ -24,11 +19,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.In.Api
                            false,
                            async (bodyAsObject, bodyAsDictionary, expectedVersion) =>
                            {
-                               await commandSender.Send(new CreateNeuronAccessRequest(
-                                   Guid.Parse(parameters.neuronId),
-                                   Guid.Parse(bodyAsObject.UserId.ToString())
-                                   )
-                               );
+                               await permitApplicationService.CreateRequestAsync(parameters.neuronId, Guid.Parse(bodyAsObject.UserId.ToString()));
                            },
                            ConcurrencyExceptionSetter,
                            new string[0],

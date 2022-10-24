@@ -10,7 +10,9 @@ namespace ei8.Cortex.IdentityAccess.Application
     {
         private readonly INeuronPermitRepository repository;
 
-        public PermitApplicationService(INeuronPermitRepository repository)
+        public PermitApplicationService(INeuronPermitRepository repository 
+            //INeuronQueryService
+            )
         {
             this.repository = repository;
         }
@@ -26,6 +28,8 @@ namespace ei8.Cortex.IdentityAccess.Application
                 UserNeuronId = userNeuronId,
                 ValidUntilUtc = null
             };
+
+            // TODO validate if neuron ID exists
 
             await this.repository.Initialize();
             await this.repository.InsertAsync(entity);
