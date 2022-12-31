@@ -29,7 +29,7 @@ namespace ei8.Cortex.IdentityAccess.Application
             {
                 NeuronId = neuronId,
                 UserNeuronId = userNeuronId,
-                ValidUntilUtc = null
+                ExpirationDate = null
             };
 
             await this.repository.Initialize();

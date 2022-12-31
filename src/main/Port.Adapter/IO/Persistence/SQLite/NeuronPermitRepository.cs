@@ -39,6 +39,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.SQLite
                                         .FirstOrDefaultAsync(np => np.UserNeuronId == userNeuronId && 
                                                                    np.NeuronId == neuronId);
         }
+
         public async Task UpdateAsync(NeuronPermit permit)
         {
             await this.connection.UpdateAsync(permit);

@@ -21,9 +21,12 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
             base.ConfigureRequestContainer(container, context);
 
             container.Register<IRequestProvider, RequestProvider>();
+            container.Resolve<IRequestProvider>().SetHttpClientHandler(new System.Net.Http.HttpClientHandler());
+
             container.Register<INeuronGraphQueryClient, HttpNeuronGraphQueryClient>();
             container.Register<IAuthorRepository, AuthorRepository>();
             container.Register<ISettingsService, SettingsService>();
+            container.Register<INeuronPermitRepository, NeuronPermitRepository>();
             container.Register<INotificationClient, HttpNotificationClient>();
             container.Register<IValidationService, ValidationService>();
             container.Register<IAuthorApplicationService, AuthorApplicationService>();

@@ -17,13 +17,15 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
         private readonly INotificationClient notificationClient;
         private readonly INeuronGraphQueryClient neuronGraphQueryClient;
         private readonly IAuthorRepository authorRepository;
+        private readonly INeuronPermitRepository neuronPermitRepository;
 
-        public ValidationService(ISettingsService settingsService, INotificationClient notificationClient, INeuronGraphQueryClient neuronGraphQueryClient, IAuthorRepository authorRepository)
+        public ValidationService(ISettingsService settingsService, INotificationClient notificationClient, INeuronGraphQueryClient neuronGraphQueryClient, IAuthorRepository authorRepository, INeuronPermitRepository neuronPermitRepository)
         {
             this.settingsService = settingsService;
             this.notificationClient = notificationClient;
             this.neuronGraphQueryClient = neuronGraphQueryClient;
             this.authorRepository = authorRepository;
+            this.neuronPermitRepository = neuronPermitRepository;
         }
 
         public async Task<ActionValidationResult> CreateNeuron(Guid neuronId, Guid? neuronRegionId, string userId, CancellationToken token = default)
@@ -183,18 +185,41 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 {
                     var regionTag = neuron.Region.Id != null ? neuron.Region.Tag : "Base";
                     // get region permit of author user for region
-                    var permit = author.Permits.SingleOrDefault(p =>
+                    var regionPermit = author.Permits.SingleOrDefault(p =>
                         p.RegionNeuronId.EqualsString(neuron.Region.Id)
                         && p.ReadLevel > 0
                     );
 
+                    await this.neuronPermitRepository.Initialize();
+                    var neuronPermit = await this.neuronPermitRepository.GetAsync(author.User.NeuronId, Guid.Parse(neuron.Id));
+
                     // does author user have a read permit
-                    if (permit == null)
+                    if (regionPermit == null)
                     {
-                        neuronResults.Add(new NeuronValidationResult(Guid.Parse(neuron.Id), new ErrorInfo[]
+                        if (neuronPermit == null)
                         {
-                            new ErrorInfo(string.Format(Constants.Messages.Exception.UnauthorizedRegionReadTemplate, regionTag), ErrorType.Warning)
-                        }));
+                            neuronResults.Add(new NeuronValidationResult(Guid.Parse(neuron.Id), new ErrorInfo[]
+                            {
+                                new ErrorInfo(string.Format(Constants.Messages.Exception.UnauthorizedRegionReadTemplate, regionTag), ErrorType.Warning)
+                            }));
+                        }
+                        else
+                        {
+                            if (!neuronPermit.ExpirationDate.HasValue)
+                            {
+                                neuronResults.Add(new NeuronValidationResult(Guid.Parse(neuron.Id), new ErrorInfo[]
+                                {
+                                    new ErrorInfo(Constants.Messages.Exception.NeuronPermitPendingOrDisabled, ErrorType.Warning)
+                                }));
+                            }
+                            else if (DateTime.Now > neuronPermit.ExpirationDate.Value)
+                            {
+                                neuronResults.Add(new NeuronValidationResult(Guid.Parse(neuron.Id), new ErrorInfo[]
+                                {
+                                    new ErrorInfo(string.Format(Constants.Messages.Exception.ExpiredNeuronPermitTemplate, neuronPermit.ExpirationDate), ErrorType.Warning)
+                                }));
+                            }
+                        }
                     }
                 }
             }

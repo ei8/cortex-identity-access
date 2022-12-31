@@ -20,6 +20,8 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 public const string UnauthorizedRegionWriteTemplate = "User not authorized to write to Region '{0}'.";
                 public const string UnauthorizedNeuronWriteTemplate = "User must be Region Admin or Neuron Creator to modify Neuron '{0}'.";
                 public const string UnauthorizedRegionReadTemplate = "User not authorized to read from Region '{0}'.";
+                public const string ExpiredNeuronPermitTemplate = "User permit to read Neuron expired on '{0}'.";
+                public const string NeuronPermitPendingOrDisabled = "Neuron permit is pending approval or has been disabled.";
             }
         }
     }
