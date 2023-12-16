@@ -1,4 +1,5 @@
 ﻿using ei8.Cortex.IdentityAccess.Application;
+using ei8.Cortex.IdentityAccess.Common;
 using Nancy;
 using Nancy.Responses;
 using Newtonsoft.Json;
@@ -19,7 +20,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
 
                 if (this.Request.Query["userid"].HasValue)
                 {
-                    var author = await authorApplicationService.GetAuthorByUserId(this.Request.Query["userid"].ToString());
+                    AuthorInfo author = await authorApplicationService.GetAuthorByUserId(this.Request.Query["userid"].ToString());
                     result = new TextResponse(JsonConvert.SerializeObject(author));
                 }
                 else

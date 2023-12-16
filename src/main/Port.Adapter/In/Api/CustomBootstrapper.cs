@@ -5,6 +5,7 @@ using ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.SQLite;
 using ei8.Cortex.IdentityAccess.Port.Adapter.IO.Process.Services;
 using Nancy;
 using Nancy.TinyIoc;
+using neurUL.Common.Http;
 
 namespace ei8.Cortex.IdentityAccess.Port.Adapter.In.Api
 {
@@ -17,6 +18,9 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.In.Api
         protected override void ConfigureRequestContainer(TinyIoCContainer container, NancyContext context)
         {
             base.ConfigureRequestContainer(container, context);
+
+            container.Register<IRequestProvider, RequestProvider>();
+            container.Resolve<IRequestProvider>().SetHttpClientHandler(new System.Net.Http.HttpClientHandler());
 
             container.Register<IPermitApplicationService, PermitApplicationService>();
             container.Register<INeuronPermitRepository, NeuronPermitRepository>();

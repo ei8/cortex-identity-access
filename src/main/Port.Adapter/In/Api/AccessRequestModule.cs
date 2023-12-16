@@ -19,11 +19,11 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.In.Api
                            false,
                            async (bodyAsObject, bodyAsDictionary, expectedVersion) =>
                            {
-                               await permitApplicationService.CreateRequestAsync(parameters.neuronId, Guid.Parse(bodyAsObject.UserId.ToString()));
+                               await permitApplicationService.CreateRequestAsync(parameters.neuronId, Guid.Parse(bodyAsObject.UserNeuronId.ToString()));
                            },
                            ConcurrencyExceptionSetter,
                            new string[0],
-                           new string[] { "UserId" }
+                           new string[] { "UserNeuronId" }
                        );
             });
         }
