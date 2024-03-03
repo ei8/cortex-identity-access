@@ -31,6 +31,7 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.Out.Api
             container.Register<IValidationService, ValidationService>();
             container.Register<IAuthorApplicationService, AuthorApplicationService>();
             container.Register<IValidationApplicationService, ValidationApplicationService>();
+            container.Register<IPermitApplicationService, PermitApplicationService>();
         }
     }
 }

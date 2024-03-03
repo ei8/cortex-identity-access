@@ -7,8 +7,10 @@ namespace ei8.Cortex.IdentityAccess.Application
 {
     public interface IPermitApplicationService
     {
-        Task GrantAccess(Guid neuronId, Guid userNeuronId, TimeSpan duration);
+        Task GrantNeuronPermitAccessAsync(Guid neuronId, Guid userNeuronId, TimeSpan duration);
 
-        Task CreateRequestAsync(Guid neuronId, Guid userNeuronId);
+        Task CreateNeuronPermitAsync(Guid neuronId, Guid userNeuronId, DateTime? expirationDate = null);
+
+        Task<IEnumerable<Guid>> GetNeuronIdsByUserNeuronIds(IEnumerable<Guid> userNeuronIds, IEnumerable<Guid> filterNeuronIds = null);
     }
 }

@@ -11,6 +11,6 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
         [PrimaryKey]
         public Guid NeuronId { get; set; }
 
-        public Nullable<DateTime> ExpirationDate { get; set; }
+        public DateTime? ExpirationDate { get; set; }
     }
 }

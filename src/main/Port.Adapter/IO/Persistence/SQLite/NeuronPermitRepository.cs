@@ -3,6 +3,8 @@ using ei8.Cortex.IdentityAccess.Domain.Model;
 using neurUL.Common.Domain.Model;
 using SQLite;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.SQLite
@@ -22,12 +24,16 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.SQLite
             AssertionConcern.AssertArgumentValid(g => g.IsNotEmpty(), permit.UserNeuronId, Constants.Messages.Exception.InvalidUserId, nameof(permit.UserNeuronId));
             AssertionConcern.AssertArgumentValid(g => g.IsNotEmpty(), permit.NeuronId, Constants.Messages.Exception.InvalidId, nameof(permit.NeuronId));
 
-            if (await this.connection.Table<NeuronPermit>()
-                                     .FirstOrDefaultAsync(np => np.UserNeuronId == permit.UserNeuronId &&
-                                                                np.NeuronId == permit.NeuronId) == null)
-            {
-                await this.connection.InsertAsync(permit);
-            }
+            var isNewPermit = await this.connection.Table<NeuronPermit>()
+                .FirstOrDefaultAsync(np => np.UserNeuronId == permit.UserNeuronId && np.NeuronId == permit.NeuronId) == null;
+            AssertionConcern.AssertArgumentValid(
+                (p) => isNewPermit,
+                permit,
+                Constants.Messages.Exception.NeuronPermitAlreadyExists,
+                nameof(permit)
+                );
+
+            await this.connection.InsertAsync(permit);
         }
 
         public async Task<NeuronPermit> GetAsync(Guid userNeuronId, Guid neuronId)
@@ -38,6 +44,30 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.IO.Persistence.SQLite
             return await this.connection.Table<NeuronPermit>()
                                         .FirstOrDefaultAsync(np => np.UserNeuronId == userNeuronId && 
                                                                    np.NeuronId == neuronId);
+        }
+
+        public async Task<IEnumerable<Guid>> GetNeuronIdsByUserNeuronIds(IEnumerable<Guid> userNeuronIds, IEnumerable<Guid> filterNeuronIds = null)
+        {
+            AssertionConcern.AssertArgumentValid(g => g != null && g.Any(), userNeuronIds, Constants.Messages.Exception.EnumerableNullOrEmpty, nameof(userNeuronIds));
+
+            var userNeuronIdsString = $"'{string.Join("', '", userNeuronIds.Select(uni => uni.ToString()))}'";
+            var filterNeuronIdsString = filterNeuronIds != null && filterNeuronIds.Any() ? 
+                $" AND NeuronId IN ('{string.Join("', '", filterNeuronIds.Select(fni => fni.ToString()))}')" : 
+                string.Empty;
+            var query = $@"
+		-- Query based on precisely the specified UserNeuronIds, ie. participants in the conversation
+		SELECT NeuronId
+		FROM NeuronPermit
+		WHERE 
+			-- UserNeuronIds
+			UserNeuronId IN ({userNeuronIdsString}) 
+			-- NeuronIds
+			{ filterNeuronIdsString }
+		GROUP BY NeuronId
+		-- count of userNeuronIds
+		HAVING count(NeuronId) == { userNeuronIds.Count() }";
+
+            return (await this.connection.QueryAsync<NeuronIdData>(query)).Select(nid => Guid.Parse(nid.NeuronId));
         }
 
         public async Task UpdateAsync(NeuronPermit permit)

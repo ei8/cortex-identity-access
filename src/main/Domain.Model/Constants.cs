@@ -22,6 +22,8 @@ namespace ei8.Cortex.IdentityAccess.Domain.Model
                 public const string UnauthorizedRegionReadTemplate = "User not authorized to read from Region '{0}'.";
                 public const string ExpiredNeuronPermitTemplate = "User permit to read Neuron expired on '{0}'.";
                 public const string NeuronPermitPendingOrDisabled = "Neuron permit is pending approval or has been disabled.";
+                public const string NeuronPermitAlreadyExists = "Neuron permit for specified Neuron ID and User Neuron ID already exists.";
+                public const string EnumerableNullOrEmpty = "Specified Enumerable is null or empty.";
             }
         }
     }

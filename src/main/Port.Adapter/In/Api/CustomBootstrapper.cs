@@ -26,7 +26,6 @@ namespace ei8.Cortex.IdentityAccess.Port.Adapter.In.Api
             container.Register<INeuronPermitRepository, NeuronPermitRepository>();
             container.Register<ISettingsService, SettingsService>();
             container.Register<INeuronGraphQueryClient, HttpNeuronGraphQueryClient>();
-            container.Register<INeuronValidationService, NeuronValidationService>();
         }
     }
 }
